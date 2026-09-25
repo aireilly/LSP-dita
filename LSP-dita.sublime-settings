@@ -1,0 +1,45 @@
+{
+    // The server is a Java shadow JAR. Both variables are supplied by the
+    // plugin: ${java_bin} is the Java found on PATH or under JAVA_HOME, and
+    // ${server_jar} is the JAR downloaded into the package storage directory.
+    //
+    // To run a locally built server instead, replace this with an absolute
+    // path, for example:
+    //   "command": ["java", "-jar", "/home/you/dita-language-server/build/libs/dita-language-server-0.1.0-all.jar"]
+    "command": ["${java_bin}", "-jar", "${server_jar}"],
+
+    // Scope supplied by DITA.sublime-syntax in this package.
+    "selector": "text.xml.dita",
+    "auto_complete_selector": "text.xml.dita",
+
+    "initializationOptions": {},
+
+    // ---------------------------------------------------------------------
+    // Client-side settings. These are read by LSP-dita itself, not sent to
+    // the language server. Every one of them can also be set per project,
+    // under "settings" -> "LSP-dita" in a .sublime-project file.
+    // ---------------------------------------------------------------------
+
+    // Absolute path to the DITA-OT `dita` executable. Leave empty to use the
+    // first `dita` found on PATH.
+    "dita_ot_path": "",
+
+    // Transformation type passed to `dita -f`.
+    "dita_ot_transtype": "html5",
+
+    // Output directory passed to `dita -o`. A relative path resolves against
+    // the directory holding the root map.
+    "dita_ot_output": "out",
+
+    // Extra arguments appended to the DITA-OT command line, for example
+    // ["--args.draft=yes"].
+    "dita_ot_args": [],
+
+    // Open index.html in a browser when a build finishes with no errors.
+    "dita_ot_open_output": true,
+
+    // Show a hover popup with the title and short description of the topic a
+    // href or conref points at. The language server already hovers keyref and
+    // conkeyref; this covers the direct file references it does not.
+    "hover_file_references": true
+}

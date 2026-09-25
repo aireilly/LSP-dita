@@ -1,0 +1,16 @@
+<snippet>
+    <content><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="${1:reference-id}">
+  <title>${2:Title}</title>
+  <shortdesc>${3:Short description.}</shortdesc>
+  <refbody>
+    <section>${0}</section>
+  </refbody>
+</reference>
+]]></content>
+    <tabTrigger>reference</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>DITA reference topic</description>
+</snippet>

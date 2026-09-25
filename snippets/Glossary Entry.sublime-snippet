@@ -1,0 +1,13 @@
+<snippet>
+    <content><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE glossentry PUBLIC "-//OASIS//DTD DITA Glossary Entry//EN" "glossentry.dtd">
+<glossentry id="${1:term-id}">
+  <glossterm>${2:Term}</glossterm>
+  <glossdef>${0:Definition.}</glossdef>
+</glossentry>
+]]></content>
+    <tabTrigger>glossentry</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>DITA glossary entry</description>
+</snippet>

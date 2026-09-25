@@ -1,0 +1,22 @@
+[
+    {
+        "caption": "LSP-dita: Set Root Map",
+        "command": "lsp_dita_set_root_map"
+    },
+    {
+        "caption": "LSP-dita: Build with DITA-OT",
+        "command": "lsp_dita_build"
+    },
+    {
+        "caption": "LSP-dita: Cancel DITA-OT Build",
+        "command": "lsp_dita_cancel_build"
+    },
+    {
+        "caption": "Preferences: LSP-dita Settings",
+        "command": "edit_settings",
+        "args": {
+            "base_file": "${packages}/LSP-dita/LSP-dita.sublime-settings",
+            "default": "// Settings in here override those in \"LSP-dita/LSP-dita.sublime-settings\"\n\n{\n\t$0\n}\n"
+        }
+    }
+]

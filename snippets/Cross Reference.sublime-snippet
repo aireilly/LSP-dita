@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+<xref href="${1:topic.dita}#${2:topic-id}">${3:Link text}</xref>$0
+]]></content>
+    <tabTrigger>xref</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Cross reference</description>
+</snippet>

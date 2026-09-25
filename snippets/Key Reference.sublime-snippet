@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+<xref keyref="${1:key-name}"/>$0
+]]></content>
+    <tabTrigger>keyref</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Key reference</description>
+</snippet>

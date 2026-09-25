@@ -1,0 +1,85 @@
+{
+  "contributions": {
+    "settings": [
+      {
+        "file_patterns": [
+          "/LSP-dita.sublime-settings"
+        ],
+        "schema": {
+          "$id": "sublime://settings/LSP-dita",
+          "definitions": {
+            "PluginConfig": {
+              "properties": {
+                "initializationOptions": {
+                  "additionalProperties": false,
+                  "properties": {}
+                },
+                "dita_ot_path": {
+                  "type": "string",
+                  "default": "",
+                  "markdownDescription": "Absolute path to the DITA-OT `dita` executable. Empty uses PATH."
+                },
+                "dita_ot_transtype": {
+                  "type": "string",
+                  "default": "html5",
+                  "markdownDescription": "Transformation type passed to `dita -f`."
+                },
+                "dita_ot_output": {
+                  "type": "string",
+                  "default": "out",
+                  "markdownDescription": "Output directory passed to `dita -o`. Relative paths resolve against the root map's directory."
+                },
+                "dita_ot_args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": [],
+                  "markdownDescription": "Extra arguments appended to the DITA-OT command line."
+                },
+                "dita_ot_open_output": {
+                  "type": "boolean",
+                  "default": true,
+                  "markdownDescription": "Open index.html in a browser when a build finishes with no errors."
+                },
+                "hover_file_references": {
+                  "type": "boolean",
+                  "default": true,
+                  "markdownDescription": "Show hover popups for href and conref file references."
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "$ref": "sublime://settings/LSP-plugin-base"
+            },
+            {
+              "$ref": "sublime://settings/LSP-dita#/definitions/PluginConfig"
+            }
+          ]
+        }
+      },
+      {
+        "file_patterns": [
+          "/*.sublime-project"
+        ],
+        "schema": {
+          "properties": {
+            "settings": {
+              "properties": {
+                "LSP": {
+                  "properties": {
+                    "LSP-dita": {
+                      "$ref": "sublime://settings/LSP-dita#/definitions/PluginConfig"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

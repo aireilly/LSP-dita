@@ -1,0 +1,20 @@
+<snippet>
+    <content><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="${1:task-id}">
+  <title>${2:Title}</title>
+  <shortdesc>${3:Short description.}</shortdesc>
+  <taskbody>
+    <prereq>${4:Prerequisites.}</prereq>
+    <steps>
+      <step><cmd>${5:First step.}</cmd></step>
+    </steps>
+    <result>${0}</result>
+  </taskbody>
+</task>
+]]></content>
+    <tabTrigger>task</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>DITA task topic</description>
+</snippet>

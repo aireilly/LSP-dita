@@ -1,0 +1,11 @@
+<snippet>
+    <content><![CDATA[
+<ul>
+  <li>${1}</li>
+  <li>${0}</li>
+</ul>
+]]></content>
+    <tabTrigger>ul</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Unordered list</description>
+</snippet>

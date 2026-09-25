@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+<note type="${1:note}">${0:Text.}</note>
+]]></content>
+    <tabTrigger>note</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Admonition</description>
+</snippet>

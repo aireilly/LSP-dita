@@ -1,0 +1,10 @@
+<snippet>
+    <content><![CDATA[
+<codeblock outputclass="language-${1:bash}">
+${0}
+</codeblock>
+]]></content>
+    <tabTrigger>codeblock</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Code block</description>
+</snippet>

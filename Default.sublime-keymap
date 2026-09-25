@@ -1,0 +1,41 @@
+[
+    // Go to Definition. Resolves href, conref, conrefend, and copy-to in the
+    // client, and hands keyref and conkeyref to the language server.
+    {
+        "keys": ["f12"],
+        "command": "lsp_dita_goto",
+        "args": {"side_by_side": false},
+        "context": [
+            {"key": "selector", "operand": "text.xml.dita"}
+        ]
+    },
+    // Code Actions from the language server.
+    {
+        "keys": ["ctrl+shift+a"],
+        "command": "lsp_code_actions",
+        "context": [
+            {"key": "selector", "operand": "text.xml.dita"},
+            {"key": "lsp.session_with_capability", "operand": "codeActionProvider"}
+        ]
+    },
+    // Hover information for keyref and conkeyref targets.
+    {
+        "keys": ["ctrl+shift+h"],
+        "command": "lsp_hover",
+        "context": [
+            {"key": "selector", "operand": "text.xml.dita"},
+            {"key": "lsp.session_with_capability", "operand": "hoverProvider"}
+        ]
+    },
+    // Build the root map with DITA-OT.
+    //
+    // This deliberately overrides Sublime's default "Build With" binding, but
+    // only inside DITA files, where running DITA-OT is what building means.
+    {
+        "keys": ["ctrl+shift+b"],
+        "command": "lsp_dita_build",
+        "context": [
+            {"key": "selector", "operand": "text.xml.dita"}
+        ]
+    }
+]

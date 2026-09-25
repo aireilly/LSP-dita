@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+<mapref href="${1:submap.ditamap}"/>$0
+]]></content>
+    <tabTrigger>mapref</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Map reference</description>
+</snippet>

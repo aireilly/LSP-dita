@@ -1,0 +1,26 @@
+[
+    // Ctrl+Click to follow a reference.
+    {
+        "button": "button1",
+        "count": 1,
+        "modifiers": ["ctrl"],
+        "command": "lsp_dita_goto",
+        "args": {"side_by_side": false},
+        "press_command": "drag_select",
+        "context": [
+            {"key": "selector", "operand": "text.xml.dita"}
+        ]
+    },
+    // Ctrl+Shift+Click to open the target beside the current file.
+    {
+        "button": "button1",
+        "count": 1,
+        "modifiers": ["ctrl", "shift"],
+        "command": "lsp_dita_goto",
+        "args": {"side_by_side": true},
+        "press_command": "drag_select",
+        "context": [
+            {"key": "selector", "operand": "text.xml.dita"}
+        ]
+    }
+]

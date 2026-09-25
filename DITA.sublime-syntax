@@ -1,0 +1,21 @@
+%YAML 1.2
+---
+# Inherits all XML highlighting and adds the `.dita` scope segment, so that
+# LSP-lemminx (selector `text.xml`) still attaches while LSP-dita can scope its
+# key bindings to DITA files alone.
+#
+# `.xml` is deliberately not claimed: the built-in XML package owns that
+# extension, and claiming it would pull every XML file in every project into
+# the DITA language server. The first_line_match below is only a fallback for
+# files no other syntax claims.
+name: DITA
+scope: text.xml.dita
+version: 2
+extends: Packages/XML/XML.sublime-syntax
+
+file_extensions:
+  - dita
+  - ditamap
+  - ditaval
+
+first_line_match: '-//OASIS//DTD DITA'

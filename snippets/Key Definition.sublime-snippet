@@ -1,0 +1,12 @@
+<snippet>
+    <content><![CDATA[
+<keydef keys="${1:key-name}" href="${2:topic.dita}">
+  <topicmeta>
+    <keywords><keyword>${3:Keyword}</keyword></keywords>
+  </topicmeta>
+</keydef>$0
+]]></content>
+    <tabTrigger>keydef</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Key definition</description>
+</snippet>

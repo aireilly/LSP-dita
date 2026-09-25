@@ -1,0 +1,17 @@
+// Syntax-specific settings for DITA files.
+//
+// Sublime Text merges a settings file named after the syntax from any package,
+// so format-on-save is enabled for DITA files only and leaves every other
+// syntax alone.
+//
+// The DITA language server provides no formatting. Formatting is answered by
+// LSP-lemminx, which is XML-aware and preserves mixed content, so saving does
+// not reflow text inside <p> and change what the topic renders as.
+{
+    "lsp_format_on_save": true,
+
+    // DITA is indentation-sensitive to read, not to parse. Spaces keep the
+    // output stable across editors.
+    "translate_tabs_to_spaces": true,
+    "tab_size": 2
+}

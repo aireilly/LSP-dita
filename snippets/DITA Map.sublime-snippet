@@ -1,0 +1,14 @@
+<snippet>
+    <content><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map>
+  <title>${1:Map title}</title>
+  <topicref href="${2:topic.dita}"/>
+  ${0}
+</map>
+]]></content>
+    <tabTrigger>ditamap</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>DITA map</description>
+</snippet>

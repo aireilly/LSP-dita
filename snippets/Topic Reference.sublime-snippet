@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+<topicref href="${1:topic.dita}"/>$0
+]]></content>
+    <tabTrigger>topicref</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Map topicref</description>
+</snippet>

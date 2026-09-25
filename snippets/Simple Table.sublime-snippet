@@ -1,0 +1,18 @@
+<snippet>
+    <content><![CDATA[
+<table>
+  <title>${1:Table title}</title>
+  <tgroup cols="2">
+    <thead>
+      <row><entry>${2:Column 1}</entry><entry>${3:Column 2}</entry></row>
+    </thead>
+    <tbody>
+      <row><entry>${4}</entry><entry>${5}</entry></row>
+    </tbody>
+  </tgroup>
+</table>$0
+]]></content>
+    <tabTrigger>table</tabTrigger>
+    <scope>text.xml.dita</scope>
+    <description>Table</description>
+</snippet>
