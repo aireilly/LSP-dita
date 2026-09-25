@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 
-from plugin.refs import Reference, parse_address, reference_at, resolve_path
+from plugin.refs import Reference, all_references, parse_address, reference_at, resolve_path
 
 
 class TestParseAddress(unittest.TestCase):
@@ -155,3 +155,49 @@ class TestSingleQuotedAttributes(unittest.TestCase):
     def test_double_quote_inside_single_quoted_value_is_kept(self):
         text = "<xref href='say\"what.dita'/>"
         self.assertEqual(reference_at(text, text.index("say")).path, 'say"what.dita')
+
+
+class TestAllReferences(unittest.TestCase):
+    """Every resolvable address in a buffer, for underlining clickable regions."""
+
+    def test_finds_each_reference_with_its_span(self):
+        text = '<topicref href="a.dita"/>\n<p conref="b.dita#t/e"/>'
+        found = all_references(text)
+        self.assertEqual(len(found), 2)
+        (s1, e1, r1), (s2, e2, r2) = found
+        self.assertEqual(text[s1:e1], "a.dita")
+        self.assertEqual(r1.attribute, "href")
+        self.assertEqual(text[s2:e2], "b.dita#t/e")
+        self.assertEqual(r2.attribute, "conref")
+
+    def test_spans_cover_only_the_value_not_the_quotes(self):
+        text = '<xref href="a.dita"/>'
+        start, end, _ = all_references(text)[0]
+        self.assertEqual(text[start - 1], '"')
+        self.assertEqual(text[end], '"')
+
+    def test_skips_external_and_non_resolvable(self):
+        text = (
+            '<xref href="https://example.com" scope="external"/>'
+            '<xref href="p.html" format="html"/>'
+            '<topicref keyref="k"/>'
+            '<xref href="ok.dita"/>'
+        )
+        found = all_references(text)
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0][2].path, "ok.dita")
+
+    def test_single_quoted_values_are_found(self):
+        text = "<xref href='a.dita'/>"
+        self.assertEqual(len(all_references(text)), 1)
+
+    def test_several_addresses_in_one_element(self):
+        text = '<topicref href="a.dita" copy-to="b.dita"/>'
+        self.assertEqual([text[s:e] for s, e, _ in all_references(text)],
+                         ["a.dita", "b.dita"])
+
+    def test_empty_buffer(self):
+        self.assertEqual(all_references(""), [])
+
+    def test_buffer_with_no_references(self):
+        self.assertEqual(all_references("<p>Just text.</p>"), [])

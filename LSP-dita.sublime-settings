@@ -41,5 +41,9 @@
     // Show a hover popup with the title and short description of the topic a
     // href or conref points at. The language server already hovers keyref and
     // conkeyref; this covers the direct file references it does not.
-    "hover_file_references": true
+    "hover_file_references": true,
+
+    // Draw a faint underline under every href and conref that Ctrl+Click can
+    // follow, so navigable values are distinguishable from ordinary text.
+    "underline_file_references": true
 }

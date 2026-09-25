@@ -10,7 +10,7 @@ adapter lives in `sublime_adapter`, which is imported lazily by the commands.
 
 import os
 import re
-from typing import Dict, NamedTuple, Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple
 from urllib.parse import unquote
 
 #: DITA attributes whose value is a resolvable address. `conaction` is absent
@@ -50,6 +50,42 @@ def _element_span(text: str, offset: int) -> Tuple[int, int]:
     return start, end
 
 
+def _build(name: str, value: str, attributes: Dict[str, str]) -> Optional[Reference]:
+    """Turn one attribute into a Reference, or None when it is not resolvable."""
+    if name not in RESOLVABLE_ATTRIBUTES:
+        return None
+    if attributes.get("scope") == "external" or attributes.get("format") == "html":
+        return None
+    if _URI_SCHEME_RE.match(value.strip()):
+        return None
+    path, topic_id, element_id = parse_address(value)
+    if not path and not topic_id:
+        return None
+    return Reference(raw=value, path=path, topic_id=topic_id,
+                     element_id=element_id, attribute=name)
+
+
+_TAG_RE = re.compile(r"<[^>]*>", re.DOTALL)
+
+
+def all_references(text: str) -> List[Tuple[int, int, Reference]]:
+    """Return (start, end, Reference) for every resolvable address in the buffer.
+
+    Spans cover the attribute value only, excluding its quotes, so a caller can
+    underline exactly the clickable text.
+    """
+    found: List[Tuple[int, int, Reference]] = []
+    for tag in _TAG_RE.finditer(text):
+        element = tag.group(0)
+        matches = list(_ATTR_RE.finditer(element))
+        attributes = {m.group(1): m.group(3) for m in matches}
+        for m in matches:
+            reference = _build(m.group(1), m.group(3), attributes)
+            if reference is not None:
+                found.append((tag.start() + m.start(3), tag.start() + m.end(3), reference))
+    return found
+
+
 def reference_at(text: str, offset: int) -> Optional[Reference]:
     """Return the resolvable Reference whose attribute value contains offset.
 
@@ -68,18 +104,7 @@ def reference_at(text: str, offset: int) -> Optional[Reference]:
             found = (match.group(1), match.group(3))
     if found is None:
         return None
-    name, value = found
-    if name not in RESOLVABLE_ATTRIBUTES:
-        return None
-    if attributes.get("scope") == "external" or attributes.get("format") == "html":
-        return None
-    if _URI_SCHEME_RE.match(value.strip()):
-        return None
-    path, topic_id, element_id = parse_address(value)
-    if not path and not topic_id:
-        return None
-    return Reference(raw=value, path=path, topic_id=topic_id,
-                     element_id=element_id, attribute=name)
+    return _build(found[0], found[1], attributes)
 
 
 def resolve_path(reference: Reference, current_file: str) -> Optional[str]:

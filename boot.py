@@ -10,6 +10,7 @@ from .plugin.build import LspDitaBuildCommand, LspDitaCancelBuildCommand  # noqa
 from .plugin.client import DitaLsp
 from .plugin.goto import LspDitaGotoCommand  # noqa: F401
 from .plugin.hover import DitaHoverListener  # noqa: F401
+from .plugin.links import DitaLinkListener  # noqa: F401
 from .plugin.rootmap import LspDitaSetRootMapCommand  # noqa: F401
 
 
