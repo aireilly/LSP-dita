@@ -1,0 +1,72 @@
+██╗     ███████╗██████╗       ██████╗ ██╗████████╗ █████╗
+██║     ██╔════╝██╔══██╗      ██╔══██╗██║╚══██╔══╝██╔══██╗
+██║     ███████╗██████╔╝█████╗██║  ██║██║   ██║   ███████║
+██║     ╚════██║██╔═══╝ ╚════╝██║  ██║██║   ██║   ██╔══██║
+███████╗███████║██║           ██████╔╝██║   ██║   ██║  ██║
+╚══════╝╚══════╝╚═╝           ╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
+==============================================================
+
+LSP-dita connects Sublime Text to the DITA Language Server.
+
+The server JAR is downloaded automatically on first use and
+verified against a pinned checksum, so there is nothing to
+install by hand.
+
+Prerequisites
+-------------
+
+1. The LSP package, from Package Control.
+
+2. Java 17 or newer on your PATH, or reachable through
+   JAVA_HOME. The language server is a Java program.
+
+3. LSP-lemminx, from Package Control. This is what formats
+   your DITA when you save. Everything else works without it.
+
+4. DITA-OT, only if you want to build from the editor. The
+   `dita` executable must be on your PATH, or named in the
+   dita_ot_path setting.
+
+First steps
+-----------
+
+Open a .dita or .ditamap file, then run this from the command
+palette:
+
+    LSP-dita: Set Root Map
+
+Do not skip it. The server builds its key space from the root
+map, so until one is set, keyref completion, keyref hover, and
+profiling validation stay silent and look broken.
+
+What you get
+------------
+
+- Diagnostics: Schematron, duplicate topic and element IDs,
+  keyref and conkeyref resolution, cross-reference targets,
+  and profiling attribute values.
+- Completion for topic IDs, element IDs, keys, and profiling
+  values from the subject scheme.
+- Ctrl+click and hover on href, conref, conrefend, copy-to,
+  keyref, and conkeyref.
+- Format on save, for DITA files only, through LSP-lemminx.
+- DITA-OT builds with clickable diagnostics, on Ctrl+Shift+B.
+- Snippets for topics, maps, and common body elements.
+
+Note that DITA-OT exits successfully even when it logs errors,
+so the build summary counts errors rather than trusting the
+exit code. Read the summary line, not just the exit status.
+
+Having problems?
+----------------
+
+Diagnostics, completion, and keyref resolution come from the
+language server:
+
+    https://github.com/aireilly/dita-language-server/issues
+
+Navigation, hover, builds, syntax, and key bindings come from
+this package:
+
+    https://github.com/aireilly/LSP-dita/issues
