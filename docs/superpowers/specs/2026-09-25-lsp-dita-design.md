@@ -64,7 +64,7 @@ These were settled during design and are not open questions.
 3. **The jar is downloaded from GitHub releases** by
    `AbstractPlugin.install_or_update`, with a settings override for local
    development.
-4. **The DITA-OT build builds the root map**, runs asynchronously with output
+4. **The DITA-OT build builds the focused map or module**, runs asynchronously with output
    streamed to a panel, parses DITA-OT diagnostics into clickable results, and
    opens the output on success.
 5. **In scope for the first version:** root map picker, DITA syntax definition,
@@ -250,9 +250,9 @@ hovers look consistent.
 
 ### 7. DITA-OT build: `build.py`
 
-Input map resolution order: the root map set by the picker, then the nearest
-`.ditamap` found walking up from the active file, then the picker opens rather
-than the command erroring.
+The focused `.dita` module or `.ditamap` is the DITA-OT input. The root map set
+by the picker is language-server context for keyref and profiling resolution;
+it does not override the focused build input.
 
 Executable resolution order: the `dita_ot_path` setting, then
 `shutil.which("dita")`. Neither found produces an error naming the setting to
@@ -273,8 +273,9 @@ captured real DITA-OT output.
 One build per window at a time. A second invocation reports the running build in
 the status bar. `LspDitaCancelBuildCommand` terminates the running build.
 
-On exit code 0 with `dita_ot_open_output` enabled, `index.html` opens in a
-browser when it exists, otherwise the output directory opens.
+On exit code 0 with `dita_ot_open_output` enabled, `index.html` opens for a map;
+the generated HTML named after the focused module opens for a topic. If the
+expected file does not exist, the output directory opens.
 
 The status bar shows build progress while the process runs.
 
@@ -388,7 +389,7 @@ configuration.
 | Jar download fails | `install_or_update` raises, LSP surfaces it, README documents manual jar placement |
 | Jar sha256 mismatch | Download discarded, error names the expected digest |
 | `dita` not found | Build command errors, naming the `dita_ot_path` setting |
-| No root map set | Build opens the picker rather than failing |
+| No focused input | Build reports that a saved `.dita` or `.ditamap` file is required |
 | Unresolvable `href` | Status bar message, no popup |
 | Target file missing | Status bar message on goto, warning style on hover |
 | Target file unparseable | Hover shows the filename without title or shortdesc |

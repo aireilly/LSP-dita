@@ -167,10 +167,15 @@ Open a Markdown or Python file and save it.
 
 ## 10. The DITA-OT build streams and its errors are clickable
 
+Focus `overview.dita` before building. To build the complete map instead,
+focus `main.ditamap`; the active file is always the DITA-OT input.
+
 Press <kbd>Ctrl+Shift+B</kbd>.
 
 **Expected:** a panel opens, the command line appears first, then output
 streams as the build runs rather than arriving all at once when it finishes.
+The command line contains `-i` followed by `overview.dita`, not an unrelated
+map elsewhere in the workspace.
 
 The scratch project has a deliberately broken `xref`, so the build logs errors.
 
@@ -185,7 +190,7 @@ positional diagnostic.
 
 Fix the broken `xref` by pointing it at `overview.dita`, then build again.
 
-**Expected:** `LSP-dita: build succeeded`, and `out/index.html` opens in a
+**Expected:** `LSP-dita: build succeeded`, and the generated HTML opens in a
 browser.
 
 ## 11. Only one build runs at a time

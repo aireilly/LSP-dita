@@ -1,8 +1,10 @@
 import os
 import re
+import tempfile
 import unittest
 
-from plugin.build import RESULT_FILE_REGEX, build_argv, count_problems, resolve_output
+from plugin.build import (BUILDABLE_EXTENSIONS, RESULT_FILE_REGEX, build_argv,
+                          count_problems, focused_input, resolve_output)
 
 # Captured verbatim from DITA-OT 4.3.1 building a map with a missing topicref
 # target and a broken xref. Paths shortened; the line shapes are unchanged.
@@ -52,6 +54,23 @@ class TestResolveOutput(unittest.TestCase):
     def test_nested_relative_output(self):
         self.assertEqual(resolve_output("/p/m.ditamap", "build/html"),
                          os.path.normpath("/p/build/html"))
+
+
+class TestFocusedInput(unittest.TestCase):
+    def test_accepts_saved_topic(self):
+        with tempfile.NamedTemporaryFile(suffix=BUILDABLE_EXTENSIONS[0]) as topic:
+            self.assertEqual(focused_input(topic.name), os.path.normpath(topic.name))
+
+    def test_accepts_saved_map(self):
+        with tempfile.NamedTemporaryFile(suffix=BUILDABLE_EXTENSIONS[1]) as ditamap:
+            self.assertEqual(focused_input(ditamap.name), os.path.normpath(ditamap.name))
+
+    def test_rejects_other_files(self):
+        with tempfile.NamedTemporaryFile(suffix=".ditaval") as ditaval:
+            self.assertIsNone(focused_input(ditaval.name))
+
+    def test_rejects_unsaved_path(self):
+        self.assertIsNone(focused_input("/tmp/not-a-saved-topic.dita"))
 
 
 class TestResultFileRegex(unittest.TestCase):

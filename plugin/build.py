@@ -1,4 +1,4 @@
-"""Run DITA-OT over the root map and surface its diagnostics in a panel.
+"""Run DITA-OT over the focused map or module and surface diagnostics in a panel.
 
 DITA-OT exits 0 even when it logs errors, so success is judged by counting
 error lines rather than by the exit code. The output panel carries a
@@ -19,23 +19,33 @@ from typing import Dict, Iterable, List, Optional, Tuple
 RESULT_FILE_REGEX = r"^(?:Error|Warning|Fatal|Info):\s+file:(/[^\s:]+):(\d+):(\d+):\s*(.*)$"
 
 PANEL_NAME = "LSP-dita Build"
+BUILDABLE_EXTENSIONS = (".dita", ".ditamap")
 
 _ERROR_RE = re.compile(r"^\s*(?:Error|Fatal):")
 _WARNING_RE = re.compile(r"^\s*Warning:")
 
 
-def build_argv(dita_bin: str, map_path: str, transtype: str,
+def build_argv(dita_bin: str, input_path: str, transtype: str,
                output: str, extra_args: List[str]) -> List[str]:
     """Assemble the DITA-OT command line."""
-    return [dita_bin, "-i", map_path, "-f", transtype, "-o", output] + list(extra_args)
+    return [dita_bin, "-i", input_path, "-f", transtype, "-o", output] + list(extra_args)
 
 
-def resolve_output(map_path: str, output: str) -> str:
-    """Resolve the output directory, relative paths landing beside the map."""
+def resolve_output(input_path: str, output: str) -> str:
+    """Resolve the output directory, relative paths landing beside the input."""
     target = output or "out"
     if os.path.isabs(target):
         return os.path.normpath(target)
-    return os.path.normpath(os.path.join(os.path.dirname(map_path), target))
+    return os.path.normpath(os.path.join(os.path.dirname(input_path), target))
+
+
+def focused_input(path: Optional[str]) -> Optional[str]:
+    """Return a saved DITA map or module path suitable for a build."""
+    if not path or not os.path.isfile(path):
+        return None
+    if os.path.splitext(path)[1].lower() not in BUILDABLE_EXTENSIONS:
+        return None
+    return os.path.normpath(path)
 
 
 def count_problems(lines: Iterable[str]) -> Tuple[int, int]:
@@ -75,8 +85,6 @@ if sublime_plugin is not None:
     import shutil
 
     from .constants import SETTINGS_FILE
-    from .rootmap import current_root_map, nearest_map
-
     _running: Dict[int, subprocess.Popen] = {}
 
     def _setting(window, key: str, default):
@@ -99,16 +107,13 @@ if sublime_plugin is not None:
         return None, (
             "LSP-dita: 'dita' not found on PATH; set dita_ot_path in LSP-dita settings")
 
-    def _resolve_map(window) -> Optional[str]:
-        chosen = current_root_map(window)
-        if chosen and os.path.isfile(chosen):
-            return chosen
+    def _resolve_focused_input(window) -> Optional[str]:
         view = window.active_view()
         name = view.file_name() if view is not None else None
-        return nearest_map(name) if name else None
+        return focused_input(name)
 
     class LspDitaBuildCommand(sublime_plugin.WindowCommand):
-        """Build the root map with DITA-OT, streaming output to a panel."""
+        """Build the focused map or module with DITA-OT."""
 
         def run(self) -> None:
             window_id = self.window.id()
@@ -122,31 +127,34 @@ if sublime_plugin is not None:
                 self.window.status_message(error)
                 return
 
-            map_path = _resolve_map(self.window)
-            if not map_path:
-                self.window.status_message("LSP-dita: no root map set; choose one first")
-                self.window.run_command("lsp_dita_set_root_map")
+            input_path = _resolve_focused_input(self.window)
+            if not input_path:
+                self.window.status_message(
+                    "LSP-dita: save a .dita or .ditamap file before building")
                 return
 
             transtype = str(_setting(self.window, "dita_ot_transtype", "html5"))
-            output = resolve_output(map_path, str(_setting(self.window, "dita_ot_output", "out")))
+            output = resolve_output(
+                input_path, str(_setting(self.window, "dita_ot_output", "out")))
             extra = list(_setting(self.window, "dita_ot_args", []) or [])
             open_output = bool(_setting(self.window, "dita_ot_open_output", True))
-            argv = build_argv(dita_bin, map_path, transtype, output, extra)
+            argv = build_argv(dita_bin, input_path, transtype, output, extra)
 
             panel = self.window.create_output_panel(PANEL_NAME)
             panel.settings().set("result_file_regex", RESULT_FILE_REGEX)
-            panel.settings().set("result_base_dir", os.path.dirname(map_path))
+            panel.settings().set("result_base_dir", os.path.dirname(input_path))
             panel.settings().set("word_wrap", True)
             panel.settings().set("line_numbers", False)
             panel.settings().set("scroll_past_end", False)
             self.window.run_command("show_panel", {"panel": "output." + PANEL_NAME})
 
             self._append(panel, "> {}\n\n".format(" ".join(argv)))
-            self.window.status_message("LSP-dita: building {}".format(os.path.basename(map_path)))
+            self.window.status_message(
+                "LSP-dita: building {}".format(os.path.basename(input_path)))
             threading.Thread(
                 target=self._run_build,
-                args=(argv, panel, window_id, output, os.path.dirname(map_path), open_output),
+                args=(argv, panel, window_id, output, os.path.dirname(input_path),
+                      open_output, input_path),
                 daemon=True,
             ).start()
 
@@ -157,7 +165,7 @@ if sublime_plugin is not None:
             sublime.set_timeout(do_append, 0)
 
         def _run_build(self, argv, panel, window_id: int, output: str,
-                       working_dir: str, open_output: bool) -> None:
+                       working_dir: str, open_output: bool, input_path: str) -> None:
             lines: List[str] = []
             try:
                 process = subprocess.Popen(
@@ -187,11 +195,15 @@ if sublime_plugin is not None:
             sublime.set_timeout(lambda: sublime.status_message(status), 0)
 
             if process.returncode == 0 and not errors and open_output:
-                sublime.set_timeout(lambda: _open_output(output), 0)
+                sublime.set_timeout(lambda: _open_output(output, input_path), 0)
 
-    def _open_output(output: str) -> None:
+    def _open_output(output: str, input_path: str) -> None:
         index = os.path.join(output, "index.html")
-        target = index if os.path.isfile(index) else output
+        module = os.path.join(
+            output, os.path.splitext(os.path.basename(input_path))[0] + ".html")
+        target = index if os.path.isfile(index) else module
+        if not os.path.exists(target):
+            target = output
         if os.path.exists(target):
             webbrowser.open("file://" + target)
 

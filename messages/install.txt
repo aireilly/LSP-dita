@@ -51,7 +51,8 @@ What you get
 - Ctrl+click and hover on href, conref, conrefend, copy-to,
   keyref, and conkeyref.
 - Format on save, for DITA files only, through LSP-lemminx.
-- DITA-OT builds with clickable diagnostics, on Ctrl+Shift+B.
+- DITA-OT builds the focused map or module with clickable diagnostics, on
+  Ctrl+Shift+B.
 - Snippets for topics, maps, and common body elements.
 
 Note that DITA-OT exits successfully even when it logs errors,

@@ -27,7 +27,7 @@
                 "dita_ot_output": {
                   "type": "string",
                   "default": "out",
-                  "markdownDescription": "Output directory passed to `dita -o`. Relative paths resolve against the root map's directory."
+                  "markdownDescription": "Output directory passed to `dita -o`. Relative paths resolve against the focused map or module's directory."
                 },
                 "dita_ot_args": {
                   "type": "array",
@@ -40,7 +40,7 @@
                 "dita_ot_open_output": {
                   "type": "boolean",
                   "default": true,
-                  "markdownDescription": "Open index.html in a browser when a build finishes with no errors."
+                  "markdownDescription": "Open generated HTML in a browser when a build finishes with no errors. Maps normally use index.html; modules use their own name."
                 },
                 "hover_file_references": {
                   "type": "boolean",
