@@ -12,6 +12,10 @@
         "command": "lsp_dita_cancel_build"
     },
     {
+        "caption": "LSP-dita: Exclude DITA Files from LSP-lemminx Validation",
+        "command": "lsp_dita_configure_lemminx"
+    },
+    {
         "caption": "Preferences: LSP-dita Settings",
         "command": "edit_settings",
         "args": {

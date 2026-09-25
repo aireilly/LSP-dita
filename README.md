@@ -93,6 +93,8 @@ Addresses parse the full DITA form, `path#topic-id/element-id`, and the jump lan
 
 References that point outside the project are left alone. An element carrying `scope="external"` or `format="html"`, or a value with a URI scheme such as `https:` or `mailto:`, is not treated as a file reference.
 
+Navigable values carry a faint underline, so you can tell at a glance which attribute values will open something. The underline covers exactly the spans the goto command acts on, which keeps the hint honest: underlined means it will open. Turn it off with `underline_file_references`.
+
 Hovering a file reference shows the target's filename, title, and short description. The filename is clickable. A target that does not exist says so instead.
 
 ## Building with DITA-OT
@@ -123,6 +125,7 @@ Open `Preferences: LSP-dita Settings` from the command palette, or go to **Prefe
 | `dita_ot_args` | `[]` | Extra DITA-OT arguments, for example `["--args.draft=yes"]`. |
 | `dita_ot_open_output` | `true` | Open `index.html` after a clean build. |
 | `hover_file_references` | `true` | Hover popups for `href` and `conref`. |
+| `underline_file_references` | `true` | Faint underline under navigable values. |
 
 Every one of these can be set per project, under `settings` → `LSP-dita` in a `.sublime-project` file, which is the natural home for a transtype or output directory that differs between repositories:
 
@@ -170,6 +173,14 @@ Element and attribute name completion is not duplicated here, because LSP-lemmin
 **The session will not start.** Check the LSP log with `LSP: Toggle Log Panel`. A Java problem reports the version it found. Run `java -version` and confirm it is 17 or newer.
 
 **Keyref completion and hover do nothing.** No root map is set. Run `LSP-dita: Set Root Map`.
+
+**A red banner about entity expansions in `svg11-flat-*.dtd`.** Lemminx validates a DITA topic by resolving its DTD chain, which reaches the SVG 1.1 DTD and exceeds the JAXP 64,000 entity expansion limit. The error names a DTD you never wrote.
+
+Raising the limit does not help. LSP-lemminx runs a GraalVM native binary by default, so `java_vmargs` and `xml.server.vmargs` are both ignored.
+
+Run `LSP-dita: Exclude DITA Files from LSP-lemminx Validation`, then restart the server. Nothing is lost: the DITA language server already validates these files with Schematron and its own DTD checks, so lemminx was duplicating work and only one of the two exploded. Formatting and DTD-driven completion carry on unaffected.
+
+The command writes to your User layer, because a package cannot override another package's settings. `settings` is a top-level key in LSP-lemminx's defaults, Sublime merges top-level keys shallowly, and `LSP-lemminx` sorts after `LSP-dita`.
 
 **Saving does not format.** Confirm LSP-lemminx is installed and enabled. `LSP: Troubleshoot Server` on an open DITA file lists the attached sessions; lemminx must be among them.
 
