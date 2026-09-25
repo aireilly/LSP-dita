@@ -27,22 +27,46 @@ LEMMINX_SETTINGS_FILE = "LSP-lemminx.sublime-settings"
 FILTERS_KEY = "xml.validation.filters"
 DITA_FILTER_PATTERN = "**{.dita,.ditamap,.ditaval}"
 
+#: A pattern on its own relaxes nothing. LSP-lemminx's own defaults pair every
+#: pattern with the relaxations it wants, and a filter entry mirrors the whole
+#: `xml.validation.*` object, so it can carry any of those keys.
+#:
+#: `enabled: False` is the decisive one: lemminx documents `schema.enabled` as
+#: governing "schema based validation", which is ambiguous about whether a DTD
+#: counts, and DITA validates against a DTD. The other two are belt and braces
+#: and cost nothing, so a change in how lemminx reads any single key cannot
+#: quietly bring the errors back.
+DITA_FILTER: Dict[str, Any] = {
+    "pattern": DITA_FILTER_PATTERN,
+    "enabled": False,
+    "noGrammar": "ignore",
+    "schema": {"enabled": "never"},
+}
+
 
 def needs_dita_filter(filters: Optional[List[Any]]) -> bool:
-    """Return True when the DITA validation filter is not present yet."""
+    """Return True unless the complete DITA filter is already present.
+
+    An entry that carries the pattern but not the relaxations still needs
+    replacing, because it matches DITA files and then changes no behaviour.
+    """
     if not filters:
         return True
-    for entry in filters:
-        if isinstance(entry, dict) and entry.get("pattern") == DITA_FILTER_PATTERN:
-            return False
-    return True
+    return not any(entry == DITA_FILTER for entry in filters)
 
 
 def with_dita_filter(filters: Optional[List[Any]]) -> List[Any]:
-    """Return the filter list with the DITA pattern appended, idempotently."""
-    result = copy.deepcopy(list(filters)) if filters else []
-    if needs_dita_filter(result):
-        result.append({"pattern": DITA_FILTER_PATTERN})
+    """Return the filter list with the complete DITA entry, idempotently.
+
+    Any existing entry for the DITA pattern is replaced rather than kept, so an
+    incomplete entry written by an earlier version gets upgraded in place.
+    """
+    result: List[Any] = [
+        copy.deepcopy(entry)
+        for entry in (filters or [])
+        if not (isinstance(entry, dict) and entry.get("pattern") == DITA_FILTER_PATTERN)
+    ]
+    result.append(copy.deepcopy(DITA_FILTER))
     return result
 
 
