@@ -54,10 +54,15 @@ class DitaHoverListener(sublime_plugin.EventListener):
                 sublime.HIDE_ON_MOUSE_MOVE_AWAY,
                 point,
                 max_width=800,
-                on_navigate=lambda href: view.window().open_file(href),
+                on_navigate=self._open,
             ),
             0,
         )
+
+    def _open(self, href: str) -> None:
+        window = sublime.active_window()
+        if window is not None:
+            window.open_file(href)
 
     def _body(self, path: str) -> str:
         name = html.escape(os.path.basename(path))

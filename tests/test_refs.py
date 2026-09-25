@@ -131,3 +131,27 @@ class TestResolvePath(unittest.TestCase):
                         topic_id="", element_id="", attribute="href")
         self.assertEqual(resolve_path(ref, self.current),
                          os.path.join(self.root, "maps", "my topic.dita"))
+
+
+class TestSingleQuotedAttributes(unittest.TestCase):
+    """XML permits either quote style; DITA files in the wild use both."""
+
+    def test_finds_single_quoted_href(self):
+        text = "<xref href='tasks/installing.dita#install/step-3'/>"
+        ref = reference_at(text, text.index("tasks"))
+        self.assertIsNotNone(ref)
+        self.assertEqual(ref.path, "tasks/installing.dita")
+        self.assertEqual(ref.element_id, "step-3")
+
+    def test_single_quoted_scope_external_still_declines(self):
+        text = "<xref href='https://example.com' scope='external'/>"
+        self.assertIsNone(reference_at(text, text.index("https")))
+
+    def test_mixed_quote_styles_in_one_element(self):
+        text = '<topicref href=\'a.dita\' copy-to="b.dita"/>'
+        self.assertEqual(reference_at(text, text.index("a.dita")).path, "a.dita")
+        self.assertEqual(reference_at(text, text.index("b.dita")).path, "b.dita")
+
+    def test_double_quote_inside_single_quoted_value_is_kept(self):
+        text = "<xref href='say\"what.dita'/>"
+        self.assertEqual(reference_at(text, text.index("say")).path, 'say"what.dita')

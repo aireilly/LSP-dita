@@ -85,11 +85,19 @@ if sublime_plugin is not None:
             return project[key]
         return sublime.load_settings(SETTINGS_FILE).get(key, default)
 
-    def _resolve_dita_binary(window) -> Optional[str]:
+    def _resolve_dita_binary(window):
+        """Return (path, error). Exactly one of the two is set."""
         configured = str(_setting(window, "dita_ot_path", "") or "")
         if configured:
-            return configured if os.path.isfile(configured) else None
-        return shutil.which("dita")
+            if os.path.isfile(configured):
+                return configured, None
+            return None, (
+                "LSP-dita: dita_ot_path points at {}, which is not a file".format(configured))
+        found = shutil.which("dita")
+        if found:
+            return found, None
+        return None, (
+            "LSP-dita: 'dita' not found on PATH; set dita_ot_path in LSP-dita settings")
 
     def _resolve_map(window) -> Optional[str]:
         chosen = current_root_map(window)
@@ -109,10 +117,9 @@ if sublime_plugin is not None:
                     "LSP-dita: a build is already running; use Cancel DITA-OT Build to stop it")
                 return
 
-            dita_bin = _resolve_dita_binary(self.window)
-            if not dita_bin:
-                self.window.status_message(
-                    "LSP-dita: 'dita' not found on PATH; set dita_ot_path in LSP-dita settings")
+            dita_bin, error = _resolve_dita_binary(self.window)
+            if error is not None:
+                self.window.status_message(error)
                 return
 
             map_path = _resolve_map(self.window)
@@ -124,6 +131,7 @@ if sublime_plugin is not None:
             transtype = str(_setting(self.window, "dita_ot_transtype", "html5"))
             output = resolve_output(map_path, str(_setting(self.window, "dita_ot_output", "out")))
             extra = list(_setting(self.window, "dita_ot_args", []) or [])
+            open_output = bool(_setting(self.window, "dita_ot_open_output", True))
             argv = build_argv(dita_bin, map_path, transtype, output, extra)
 
             panel = self.window.create_output_panel(PANEL_NAME)
@@ -138,7 +146,7 @@ if sublime_plugin is not None:
             self.window.status_message("LSP-dita: building {}".format(os.path.basename(map_path)))
             threading.Thread(
                 target=self._run_build,
-                args=(argv, panel, window_id, output),
+                args=(argv, panel, window_id, output, os.path.dirname(map_path), open_output),
                 daemon=True,
             ).start()
 
@@ -148,7 +156,8 @@ if sublime_plugin is not None:
                                              "force": True, "scroll_to_end": True})
             sublime.set_timeout(do_append, 0)
 
-        def _run_build(self, argv, panel, window_id: int, output: str) -> None:
+        def _run_build(self, argv, panel, window_id: int, output: str,
+                       working_dir: str, open_output: bool) -> None:
             lines: List[str] = []
             try:
                 process = subprocess.Popen(
@@ -157,6 +166,7 @@ if sublime_plugin is not None:
                     stderr=subprocess.STDOUT,
                     universal_newlines=True,
                     bufsize=1,
+                    cwd=working_dir or None,
                 )
             except OSError as error:
                 self._append(panel, "Failed to start DITA-OT: {}\n".format(error))
@@ -176,9 +186,8 @@ if sublime_plugin is not None:
             self._append(panel, "\n{}\n".format(status))
             sublime.set_timeout(lambda: sublime.status_message(status), 0)
 
-            if process.returncode == 0 and not errors:
-                if _setting(self.window, "dita_ot_open_output", True):
-                    sublime.set_timeout(lambda: _open_output(output), 0)
+            if process.returncode == 0 and not errors and open_output:
+                sublime.set_timeout(lambda: _open_output(output), 0)
 
     def _open_output(output: str) -> None:
         index = os.path.join(output, "index.html")

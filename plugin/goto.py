@@ -24,15 +24,17 @@ class LspDitaGotoCommand(sublime_plugin.TextCommand):
         if target is None:
             self.view.run_command("lsp_symbol_definition", {"side_by_side": side_by_side})
             return
+        window = self.view.window()
+        if window is None:
+            return
         path, row = target
         if not os.path.isfile(path):
-            self.view.window().status_message(
-                "LSP-dita: {} does not exist".format(os.path.relpath(path)))
+            window.status_message("LSP-dita: {} does not exist".format(path))
             return
         flags = sublime.ENCODED_POSITION
         if side_by_side:
             flags |= sublime.ADD_TO_SELECTION | sublime.SEMI_TRANSIENT
-        self.view.window().open_file("{}:{}:{}".format(path, row + 1, 1), flags)
+        window.open_file("{}:{}:{}".format(path, row + 1, 1), flags)
 
     def _target(self) -> Optional[Tuple[str, int]]:
         selections = self.view.sel()

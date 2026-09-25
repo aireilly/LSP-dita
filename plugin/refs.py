@@ -19,7 +19,9 @@ from urllib.parse import unquote
 RESOLVABLE_ATTRIBUTES = ("href", "conref", "conrefend", "copy-to")
 
 _URI_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
-_ATTR_RE = re.compile(r'([A-Za-z_][\w.:-]*)\s*=\s*"([^"]*)"')
+# XML permits either quote style, and DITA files in the wild use both. The
+# backreference keeps a double quote inside a single-quoted value intact.
+_ATTR_RE = re.compile(r"""([A-Za-z_][\w.:-]*)\s*=\s*(["'])(.*?)\2""", re.DOTALL)
 
 
 class Reference(NamedTuple):
@@ -61,9 +63,9 @@ def reference_at(text: str, offset: int) -> Optional[Reference]:
     found: Optional[Tuple[str, str]] = None
     attributes: Dict[str, str] = {}
     for match in _ATTR_RE.finditer(element):
-        attributes[match.group(1)] = match.group(2)
-        if match.start(2) <= local <= match.end(2):
-            found = (match.group(1), match.group(2))
+        attributes[match.group(1)] = match.group(3)
+        if match.start(3) <= local <= match.end(3):
+            found = (match.group(1), match.group(3))
     if found is None:
         return None
     name, value = found

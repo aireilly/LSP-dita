@@ -15,10 +15,9 @@ import sublime
 
 from LSP.plugin import AbstractPlugin, ClientConfig
 
-from .constants import JAR_NAME, MINIMUM_JAVA, PACKAGE_NAME, SESSION_NAME
+from .constants import JAR_NAME, MINIMUM_JAVA, PACKAGE_NAME, SERVER_VERSION, SESSION_NAME
 from .java import parse_java_major
 from .server import install, jar_path, needs_install
-from .constants import SERVER_VERSION
 
 
 def _find_java() -> Optional[str]:
