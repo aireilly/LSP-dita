@@ -18,7 +18,7 @@ _SHORTDESC_RE = re.compile(r"<shortdesc\b[^>]*>(.*?)</shortdesc>", re.DOTALL)
 # Ordered so that &amp; is expanded last and cannot re-introduce another entity.
 _ENTITIES = (("&lt;", "<"), ("&gt;", ">"), ("&quot;", '"'), ("&apos;", "'"), ("&amp;", "&"))
 
-_cache = {}  # type: Dict[str, Tuple[float, Optional["TopicInfo"]]]
+_cache: Dict[str, Tuple[float, Optional["TopicInfo"]]] = {}
 
 
 class TopicInfo(NamedTuple):

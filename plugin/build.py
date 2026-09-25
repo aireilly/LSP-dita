@@ -77,7 +77,7 @@ if sublime_plugin is not None:
     from .constants import SETTINGS_FILE
     from .rootmap import current_root_map, nearest_map
 
-    _running = {}  # type: Dict[int, subprocess.Popen]
+    _running: Dict[int, subprocess.Popen] = {}
 
     def _setting(window, key: str, default):
         project = (window.project_data() or {}).get("settings", {}).get("LSP-dita", {})
@@ -149,7 +149,7 @@ if sublime_plugin is not None:
             sublime.set_timeout(do_append, 0)
 
         def _run_build(self, argv, panel, window_id: int, output: str) -> None:
-            lines = []  # type: List[str]
+            lines: List[str] = []
             try:
                 process = subprocess.Popen(
                     argv,

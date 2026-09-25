@@ -58,8 +58,8 @@ def reference_at(text: str, offset: int) -> Optional[Reference]:
     start, end = _element_span(text, offset)
     element = text[start:end]
     local = offset - start
-    found = None  # type: Optional[Tuple[str, str]]
-    attributes = {}  # type: Dict[str, str]
+    found: Optional[Tuple[str, str]] = None
+    attributes: Dict[str, str] = {}
     for match in _ATTR_RE.finditer(element):
         attributes[match.group(1)] = match.group(2)
         if match.start(2) <= local <= match.end(2):
