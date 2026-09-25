@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Optional
 
 LEMMINX_SETTINGS_FILE = "LSP-lemminx.sublime-settings"
 FILTERS_KEY = "xml.validation.filters"
+MAX_LINE_WIDTH_KEY = "xml.format.maxLineWidth"
 DITA_FILTER_PATTERN = "**{.dita,.ditamap,.ditaval}"
 
 #: A pattern on its own relaxes nothing. LSP-lemminx's own defaults pair every
@@ -70,6 +71,28 @@ def with_dita_filter(filters: Optional[List[Any]]) -> List[Any]:
     return result
 
 
+def configured_settings(current: Dict[str, Any]) -> Dict[str, Any]:
+    """Return the lemminx settings with every DITA adjustment applied.
+
+    Two adjustments today. Validation is filtered out because the DITA
+    language server already does it and lemminx's attempt dies on the SVG DTD.
+    Hard line wrapping is switched off because a DITA topic is mixed content:
+    wrapping rewrites the source of a <p> across several lines, which is the
+    formatter editing prose rather than markup. Soft wrapping in the editor
+    gives the same reading width and leaves the file alone, and LSP-dita turns
+    that on through DITA.sublime-settings.
+    """
+    result = dict(current)
+    result[FILTERS_KEY] = with_dita_filter(current.get(FILTERS_KEY))
+    result[MAX_LINE_WIDTH_KEY] = 0
+    return result
+
+
+def needs_configuring(current: Dict[str, Any]) -> bool:
+    """Return True when applying the adjustments would change anything."""
+    return configured_settings(current) != dict(current)
+
+
 try:
     import sublime
     import sublime_plugin
@@ -81,23 +104,22 @@ except ImportError:  # imported by the test suite, not by Sublime Text
 if sublime_plugin is not None:
 
     class LspDitaConfigureLemminxCommand(sublime_plugin.WindowCommand):
-        """Exclude DITA files from LSP-lemminx validation, in User settings."""
+        """Apply the DITA adjustments to LSP-lemminx, in User settings."""
 
         def run(self) -> None:
             settings = sublime.load_settings(LEMMINX_SETTINGS_FILE)
             # .get() returns the merged value, so the write preserves whatever
             # the defaults and the user already had.
             merged: Dict[str, Any] = dict(settings.get("settings") or {})
-            if not needs_dita_filter(merged.get(FILTERS_KEY)):
+            if not needs_configuring(merged):
                 self.window.status_message(
-                    "LSP-dita: LSP-lemminx already skips validation for DITA files")
+                    "LSP-dita: LSP-lemminx is already configured for DITA")
                 return
-            merged[FILTERS_KEY] = with_dita_filter(merged.get(FILTERS_KEY))
-            settings.set("settings", merged)
+            settings.set("settings", configured_settings(merged))
             sublime.save_settings(LEMMINX_SETTINGS_FILE)
             self.window.status_message(
-                "LSP-dita: LSP-lemminx will skip validation for DITA files; "
-                "restart the server to apply")
+                "LSP-dita: configured LSP-lemminx for DITA (validation off, "
+                "no hard wrapping); restart the server to apply")
 
         def is_enabled(self) -> bool:
             return sublime.load_settings(LEMMINX_SETTINGS_FILE) is not None

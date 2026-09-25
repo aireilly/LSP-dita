@@ -1,17 +1,33 @@
 // Syntax-specific settings for DITA files.
 //
 // Sublime Text merges a settings file named after the syntax from any package,
-// so format-on-save is enabled for DITA files only and leaves every other
-// syntax alone.
-//
-// The DITA language server provides no formatting. Formatting is answered by
-// LSP-lemminx, which is XML-aware and preserves mixed content, so saving does
-// not reflow text inside <p> and change what the topic renders as.
+// so everything here applies to DITA files only and leaves every other syntax
+// alone.
 {
+    // The DITA language server provides no formatting. Formatting is answered
+    // by LSP-lemminx, which is XML-aware and preserves mixed content, so
+    // saving does not reflow text inside <p> and change what the topic
+    // renders as.
     "lsp_format_on_save": true,
 
+    // Wrap long lines visually instead of writing newlines into the file.
+    //
+    // A DITA topic is mixed content, so a paragraph is one long line of prose
+    // in the source. Soft wrapping makes it readable without the formatter
+    // hard-wrapping it, which would rewrite the author's text. Pair this with
+    // "LSP-dita: Configure LSP-lemminx for DITA", which sets
+    // xml.format.maxLineWidth to 0 so lemminx stops inserting those breaks.
+    "word_wrap": true,
+
+    // Wrap at the window edge rather than a fixed column.
+    "wrap_width": 0,
+
+    // Indent wrapped lines to match the start of the line, so the structure
+    // of a nested element stays readable once it wraps.
+    "indent_subsequent_lines": true,
+
     // DITA is indentation-sensitive to read, not to parse. Spaces keep the
-    // output stable across editors.
+    // result stable across editors.
     "translate_tabs_to_spaces": true,
     "tab_size": 2
 }

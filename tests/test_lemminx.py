@@ -1,6 +1,15 @@
 import unittest
 
-from plugin.lemminx import DITA_FILTER, DITA_FILTER_PATTERN, needs_dita_filter, with_dita_filter
+from plugin.lemminx import (
+    DITA_FILTER,
+    DITA_FILTER_PATTERN,
+    FILTERS_KEY,
+    MAX_LINE_WIDTH_KEY,
+    configured_settings,
+    needs_configuring,
+    needs_dita_filter,
+    with_dita_filter,
+)
 
 
 class TestDitaFilterShape(unittest.TestCase):
@@ -86,3 +95,49 @@ class TestNeedsDitaFilter(unittest.TestCase):
 
     def test_true_for_none(self):
         self.assertTrue(needs_dita_filter(None))
+
+
+class TestConfiguredSettings(unittest.TestCase):
+    """The full set of lemminx adjustments DITA needs."""
+
+    def test_disables_hard_line_wrapping(self):
+        # Wrapping rewrites the source of a <p> into several lines. DITA is
+        # mixed content, so this is the editor changing prose the author wrote.
+        result = configured_settings({MAX_LINE_WIDTH_KEY: 100})
+        self.assertEqual(result[MAX_LINE_WIDTH_KEY], 0)
+
+    def test_adds_the_validation_filter(self):
+        result = configured_settings({})
+        self.assertIn(DITA_FILTER, result[FILTERS_KEY])
+
+    def test_preserves_unrelated_settings(self):
+        result = configured_settings({"xml.format.enabled": True, "xml.catalogs": ["c.xml"]})
+        self.assertTrue(result["xml.format.enabled"])
+        self.assertEqual(result["xml.catalogs"], ["c.xml"])
+
+    def test_does_not_mutate_the_input(self):
+        original = {MAX_LINE_WIDTH_KEY: 100}
+        configured_settings(original)
+        self.assertEqual(original, {MAX_LINE_WIDTH_KEY: 100})
+
+    def test_is_idempotent(self):
+        once = configured_settings({})
+        self.assertEqual(configured_settings(once), once)
+
+
+class TestNeedsConfiguring(unittest.TestCase):
+    def test_true_for_untouched_settings(self):
+        self.assertTrue(needs_configuring({MAX_LINE_WIDTH_KEY: 100}))
+
+    def test_true_when_only_wrapping_is_wrong(self):
+        done = configured_settings({})
+        done[MAX_LINE_WIDTH_KEY] = 100
+        self.assertTrue(needs_configuring(done))
+
+    def test_true_when_only_the_filter_is_missing(self):
+        done = configured_settings({})
+        done[FILTERS_KEY] = []
+        self.assertTrue(needs_configuring(done))
+
+    def test_false_once_applied(self):
+        self.assertFalse(needs_configuring(configured_settings({})))

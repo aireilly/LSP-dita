@@ -67,7 +67,15 @@ This package ships a `DITA.sublime-settings` file that switches on `lsp_format_o
 
 <kbd>Ctrl+S</kbd> is never rebound. Saving formats because LSP formats on save, which means the usual save behaviour, undo, and every other package that hooks saving all keep working.
 
-To turn it off, set `"lsp_format_on_save": false` in `Preferences: Settings – Syntax Specific` with a DITA file open.
+### Soft wrapping, not hard wrapping
+
+A DITA topic is mixed content, so a paragraph is one long line of prose in the source. Lemminx's default `xml.format.maxLineWidth` of 100 rewrites that line into several, inserting real newlines into your text on every save.
+
+This package turns on Sublime's `word_wrap` for DITA files, so long lines wrap visually and the file on disk keeps one line per paragraph. Run `LSP-dita: Configure LSP-lemminx for DITA` to set `xml.format.maxLineWidth` to `0` and stop lemminx inserting the breaks.
+
+You get the same reading width either way. The difference is whether your diffs show a paragraph you edited or a paragraph the formatter rewrapped.
+
+To turn formatting off entirely, set `"lsp_format_on_save": false` in `Preferences: Settings – Syntax Specific` with a DITA file open.
 
 ## Key bindings
 
@@ -178,13 +186,15 @@ Element and attribute name completion is not duplicated here, because LSP-lemmin
 
 Raising the limit does not help. LSP-lemminx runs a GraalVM native binary by default, so `java_vmargs` and `xml.server.vmargs` are both ignored.
 
-Run `LSP-dita: Exclude DITA Files from LSP-lemminx Validation`, then restart the server. Nothing is lost: the DITA language server already validates these files with Schematron and its own DTD checks, so lemminx was duplicating work and only one of the two exploded. Formatting and DTD-driven completion carry on unaffected.
+Run `LSP-dita: Configure LSP-lemminx for DITA`, then restart the server. Nothing is lost: the DITA language server already validates these files with Schematron and its own DTD checks, so lemminx was duplicating work and only one of the two exploded. Formatting and DTD-driven completion carry on unaffected.
 
 The command writes to your User layer, because a package cannot override another package's settings. `settings` is a top-level key in LSP-lemminx's defaults, Sublime merges top-level keys shallowly, and `LSP-lemminx` sorts after `LSP-dita`.
 
 **Saving does not format.** Confirm LSP-lemminx is installed and enabled. `LSP: Troubleshoot Server` on an open DITA file lists the attached sessions; lemminx must be among them.
 
 **A `.xml` file holding a DITA topic is not recognised.** The built-in XML package claims `.xml`, and an extension claim beats a first-line match. Set the syntax by hand with **View > Syntax > DITA**. This package deliberately does not claim `.xml`, which would drag every XML file in every project into the DITA server.
+
+**Saving rewraps my paragraphs into several lines.** Lemminx hard-wraps at `xml.format.maxLineWidth`, which defaults to 100. Run `LSP-dita: Configure LSP-lemminx for DITA`, which sets it to `0`. This package already enables soft wrapping so long lines stay readable.
 
 **Ctrl+click does nothing on a reference.** Check whether the element carries `scope="external"` or `format="html"`, both of which mark a target this package will not try to open.
 
